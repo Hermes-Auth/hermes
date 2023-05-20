@@ -1,3 +1,6 @@
+pub mod Auth;
+pub mod Codes;
+
 use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
 
 #[get("/hermes/health")]

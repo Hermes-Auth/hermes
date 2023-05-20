@@ -11,7 +11,6 @@ pub struct AppState {
     db: Pool<Postgres>
 }
 
-
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     dotenv().ok();
@@ -21,7 +20,7 @@ async fn main() -> std::io::Result<()> {
         .connect(&db_url)
         .await
         .expect("Failed to connect to database");
-
+    println!("Connected to database");
     HttpServer::new( move || {
         App::new()
             .app_data( Data::new(AppState { db: pool.clone() }) )
