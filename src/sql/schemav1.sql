@@ -1,6 +1,7 @@
 CREATE TABLE users (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    email VARCHAR(255) NOT NULL
+    email VARCHAR(255) NOT NULL,
+    api_key TEXT NOT NULL
 );
 
 CREATE TABLE services (
