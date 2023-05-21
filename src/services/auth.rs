@@ -8,7 +8,7 @@ use serde_json::json;
 use sqlx::FromRow;
 
 use crate::AppState;
-use crate::utils::redis::get_key;
+use crate::utils::redis::{ get_key, set_key, rm_key };
 
 #[derive(Deserialize, Serialize, FromRow, Debug)]
 pub struct User {
@@ -38,25 +38,33 @@ pub async fn test() -> impl Responder {
 
 #[post("/auth")]
 pub async fn register(state: Data<AppState>, body:Json<UserData>) -> impl Responder {
-    //Check if user is not already in database
-    match sqlx::query_as::<_, User>("INSERT INTO users(email) VALUES($1) RETURNING id, email, api_key").bind(&body.email).fetch_one(&state.db).await {
-        Ok(user)=>{
-            println!("{:?}", user);
-            HttpResponse::Ok().json(json!({"user":"user"}))
-        },
-        Err(err)=>{
-            match &err {
-               sqlx::Error::Database(error)=>{
-                   println!("{error}");
-                   HttpResponse::Conflict().body("User already exists")
-               },
-               _=>{
-                   print!("{err}");
-                   HttpResponse::InternalServerError().body("")
-               }
+    if let Ok(response) = get_key(body.email.to_string()).await {
+        if let Ok(data) = response.text().await{
+            match sqlx::query_as::<_, User>("INSERT INTO users(email) VALUES($1) RETURNING id, email, api_key").bind(&body.email).fetch_one(&state.db).await {
+                Ok(user)=>{
+                    println!("{:?}", user);
+                    HttpResponse::Ok().json(json!({"user":"user"}))
+                },
+                Err(err)=>{
+                    match &err {
+                        sqlx::Error::Database(error)=>{
+                            println!("{error}");
+                            HttpResponse::Conflict().body("User already exists")
+                        },
+                        _=>{
+                            print!("{err}");
+                            HttpResponse::InternalServerError().body("")
+                        }
+                    }
+                }
+
             }
+
+        }else {
+            HttpResponse::InternalServerError().body("")
         }
-        
+    }else{
+        HttpResponse::InternalServerError().body("")
     }
 }
 
