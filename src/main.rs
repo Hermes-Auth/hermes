@@ -5,7 +5,7 @@ use actix_web::{ App, HttpServer, web::Data };
 use dotenv::dotenv;
 use sqlx::{ postgres::PgPoolOptions, Pool, Postgres };
 
-use services::{ get_health, codes::send_code };
+use services::{ get_health, codes::send_code, auth::{register, login, test} };
 
 pub struct AppState {
     db: Pool<Postgres>
@@ -26,6 +26,9 @@ async fn main() -> std::io::Result<()> {
             .app_data( Data::new(AppState { db: pool.clone() }) )
             .service(get_health)
             .service(send_code)
+            .service(register)
+            .service(login)
+            .service(test)
     })
     .bind(("0.0.0.0", 8080))?
     .run()
