@@ -1,4 +1,5 @@
-pub mod Auth;
+pub mod auth;
+pub mod codes;
 // pub mod Codes;
 
 use actix_web::{get, HttpResponse, Responder};
