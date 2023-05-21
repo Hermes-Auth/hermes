@@ -1,6 +1,6 @@
 pub mod auth;
 pub mod codes;
-pub mod services;
+pub mod apps;
 
 use actix_web::{get, HttpResponse, Responder};
 

@@ -1,14 +1,14 @@
 use actix_web::{
-    post, get,
+    get, post,
     web::{Data, Json},
     HttpResponse, Responder,
 };
 use serde::{Deserialize, Serialize};
-use serde_json::json;
+use serde_json::{json, Value};
 use sqlx::FromRow;
 
+use crate::utils::redis::{get_key, rm_key, set_key};
 use crate::AppState;
-use crate::utils::redis::{ get_key, set_key, rm_key };
 
 #[derive(Deserialize, Serialize, FromRow, Debug)]
 pub struct User {
@@ -29,63 +29,71 @@ pub async fn test() -> impl Responder {
     if let Ok(response) = test {
         let breh = response.text().await.unwrap();
         println!("{breh}");
-    }else {
-
+    } else {
     }
     HttpResponse::Ok().body("")
 }
 
-
 #[post("/auth")]
-pub async fn register(state: Data<AppState>, body:Json<UserData>) -> impl Responder {
+pub async fn register(state: Data<AppState>, body: Json<UserData>) -> impl Responder {
     if let Ok(response) = get_key(body.email.to_string()).await {
-        if let Ok(data) = response.text().await{
-            match sqlx::query_as::<_, User>("INSERT INTO users(email) VALUES($1) RETURNING id, email, api_key").bind(&body.email).fetch_one(&state.db).await {
-                Ok(user)=>{
-                    println!("{:?}", user);
-                    HttpResponse::Ok().json(json!({"user":"user"}))
-                },
-                Err(err)=>{
-                    match &err {
-                        sqlx::Error::Database(error)=>{
-                            println!("{error}");
-                            HttpResponse::Conflict().body("User already exists")
-                        },
-                        _=>{
-                            print!("{err}");
-                            HttpResponse::InternalServerError().body("")
+        if let Ok(data) = response.text().await {
+            let json_data: Result<Value, _> = serde_json::from_str(&data);
+            match json_data {
+                Ok(value) => {
+                    let redis_result = value.get("result").unwrap();
+                    println!("{redis_result}");
+                    match sqlx::query_as::<_, User>(
+                        "INSERT INTO users(email) VALUES($1) RETURNING id, email, api_key",
+                    )
+                    .bind(&body.email)
+                    .fetch_one(&state.db)
+                    .await
+                    {
+                        Ok(user) => {
+                            println!("{:?}", user);
+                            HttpResponse::Ok().json(json!({"user":"user"}))
                         }
+                        Err(err) => match &err {
+                            sqlx::Error::Database(error) => {
+                                println!("{error}");
+                                HttpResponse::Conflict().body("User already exists")
+                            }
+                            _ => {
+                                print!("{err}");
+                                HttpResponse::InternalServerError().body("")
+                            }
+                        },
                     }
                 }
-
+                Err(_) => HttpResponse::InternalServerError().body(""),
             }
-
-        }else {
+        } else {
             HttpResponse::InternalServerError().body("")
         }
-    }else{
+    } else {
         HttpResponse::InternalServerError().body("")
     }
 }
-
 
 #[post("/auth/get_api_key")]
 pub async fn login(state: Data<AppState>, body: Json<UserData>) -> impl Responder {
     match sqlx::query_as::<_, User>("SELECT * FROM users WHERE email = $1")
         .bind(&body.email)
         .fetch_optional(&state.db)
-        .await {
-            Ok(result)=>{
-                if let Some(_) = result{
-                    //Create paseto token
-                    HttpResponse::Ok().json(json!({"token":"token"}))
-                }else{
-                    HttpResponse::NotFound().body("User not found")
-                }
-            },
-            Err(err)=>{
-                println!("Error {err}");
-                HttpResponse::InternalServerError().body("")
+        .await
+    {
+        Ok(result) => {
+            if let Some(_) = result {
+                //Create paseto token
+                HttpResponse::Ok().json(json!({"token":"token"}))
+            } else {
+                HttpResponse::NotFound().body("User not found")
             }
         }
+        Err(err) => {
+            println!("Error {err}");
+            HttpResponse::InternalServerError().body("")
+        }
+    }
 }
