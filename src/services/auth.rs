@@ -5,7 +5,7 @@ use actix_web::{
 };
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
-use sqlx::FromRow;
+use sqlx::{FromRow};
 
 use crate::utils::redis::{get_key, rm_key, set_key};
 use crate::AppState;
@@ -51,22 +51,15 @@ pub async fn register(state: Data<AppState>, body: Json<UserData>) -> impl Respo
                     .await
                     {
                         Ok(user) => {
-                            println!("{:?}", user);
                             HttpResponse::Ok().json(json!({"user":"user"}))
                         }
-                        Err(err) => match &err {
-                            sqlx::Error::Database(error) => {
-                                println!("{error}");
-                                HttpResponse::Conflict().body("User already exists")
-                            }
-                            _ => {
-                                print!("{err}");
-                                HttpResponse::InternalServerError().body("")
-                            }
+                        Err(err) =>  {
+                            println!("{err}");
+                            HttpResponse::InternalServerError().body(err.to_string())
                         },
                     }
                 }
-                Err(_) => HttpResponse::InternalServerError().body(""),
+                Err(err) => HttpResponse::InternalServerError().body(err.to_string()),
             }
         } else {
             HttpResponse::InternalServerError().body("")
