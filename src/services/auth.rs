@@ -17,6 +17,7 @@ use crate::AppState;
 pub struct User {
     id: String,
     email: String,
+    api_key: String
 }
 
 #[derive(Deserialize)]
@@ -47,7 +48,7 @@ pub async fn register(state: Data<AppState>, body: Json<UserData>) -> impl Respo
                     match redis_result {
                         Value::Null => {
                             let new_api_key = gen_api_key();
-                            match sqlx::query_as::<_, User>("insert into users(email, api_key) values($1, $2) returning api_key")
+                            match sqlx::query_as::<_, User>("insert into users(email, api_key) values($1, $2) returning id, email, api_key")
                                 .bind(&body.email)
                                 .bind(new_api_key)
                                 .fetch_one(&state.db)
