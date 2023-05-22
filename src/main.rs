@@ -1,7 +1,7 @@
 pub mod services;
 pub mod utils;
 
-use actix_web::{ App, HttpServer, web::Data };
+use actix_web::{ App, HttpServer, web::Data, middleware::Logger };
 use dotenv::dotenv;
 use sqlx::{ postgres::PgPoolOptions, Pool, Postgres };
 
@@ -23,6 +23,7 @@ async fn main() -> std::io::Result<()> {
     println!("Connected to database");
     HttpServer::new( move || {
         App::new()
+            .wrap(Logger::default())
             .app_data( Data::new(AppState { db: pool.clone() }) )
             .service(get_health)
             .service(send_code)

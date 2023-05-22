@@ -5,16 +5,18 @@ use actix_web::{
 };
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
-use sqlx::{FromRow};
+use sqlx::FromRow;
 
-use crate::utils::redis::{get_key, rm_key, set_key};
+use crate::utils::{
+    gen_api_key,
+    redis::{get_key, rm_key, set_key},
+};
 use crate::AppState;
 
 #[derive(Deserialize, Serialize, FromRow, Debug)]
 pub struct User {
     id: String,
     email: String,
-    api_key: String,
 }
 
 #[derive(Deserialize)]
@@ -42,21 +44,26 @@ pub async fn register(state: Data<AppState>, body: Json<UserData>) -> impl Respo
             match json_data {
                 Ok(value) => {
                     let redis_result = value.get("result").unwrap();
-                    println!("{redis_result}");
-                    match sqlx::query_as::<_, User>(
-                        "INSERT INTO users(email) VALUES($1) RETURNING id, email, api_key",
-                    )
-                    .bind(&body.email)
-                    .fetch_one(&state.db)
-                    .await
-                    {
-                        Ok(user) => {
-                            HttpResponse::Ok().json(json!({"user":"user"}))
+                    match redis_result {
+                        Value::Null => {
+                            let new_api_key = gen_api_key();
+                            match sqlx::query_as::<_, User>("insert into users(email, api_key) values($1, $2) returning api_key")
+                                .bind(&body.email)
+                                .bind(new_api_key)
+                                .fetch_one(&state.db)
+                                .await{
+                                    Ok(user)=>{
+                                        println!("{:?}", user);
+                                        HttpResponse::Ok().json(json!({"key":"key"}))
+                                    }
+                                    Err(err)=>{
+                                        HttpResponse::InternalServerError().body(err.to_string())
+                                    }
+                                
+                            }
                         }
-                        Err(err) =>  {
-                            println!("{err}");
-                            HttpResponse::InternalServerError().body(err.to_string())
-                        },
+                        Value::String(key) => HttpResponse::Ok().json(json!({ "key": key })),
+                        _ => HttpResponse::InternalServerError().body(""),
                     }
                 }
                 Err(err) => HttpResponse::InternalServerError().body(err.to_string()),
