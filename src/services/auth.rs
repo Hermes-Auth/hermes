@@ -54,8 +54,7 @@ pub async fn register(state: Data<AppState>, body: Json<UserData>) -> impl Respo
                                 .fetch_one(&state.db)
                                 .await{
                                     Ok(user)=>{
-                                        println!("{:?}", user);
-                                        HttpResponse::Ok().json(json!({"key":"key"}))
+                                        HttpResponse::Ok().json(json!({"key":user.api_key}))
                                     }
                                     Err(err)=>{
                                         HttpResponse::InternalServerError().body(err.to_string())
