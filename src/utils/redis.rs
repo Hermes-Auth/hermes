@@ -28,6 +28,9 @@ pub async fn get_key( key: String ) -> Result<reqwest::Response, reqwest::Error>
     req_redis(command).await
 }
 
-pub async fn set_key() {}
+pub async fn set_key(key: String, value: String) -> Result<reqwest::Response, reqwest::Error>{
+    let command = format!("set/{key}/{value}");
+    req_redis(command).await
+}
 
 pub async fn rm_key() {}

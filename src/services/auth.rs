@@ -54,6 +54,7 @@ pub async fn register(state: Data<AppState>, body: Json<UserData>) -> impl Respo
                                 .fetch_one(&state.db)
                                 .await{
                                     Ok(user)=>{
+                                        let _ = set_key(body.email.to_owned(), user.api_key.to_owned()).await;
                                         HttpResponse::Ok().json(json!({"key":user.api_key}))
                                     }
                                     Err(err)=>{
