@@ -7,11 +7,11 @@ export async function auth( req: Request<{}, {}, { email: string, auth_code: str
         const { email, auth_code } = req.body
         await sql` select * from users where email=${email} `.then(async result=>{
             if(result.length===0){
-                await sql` insert into users(email) values(${email}) returning *`
-                const token = sign_token(email)
+                const new_user = await sql` insert into users(email) values(${email}) returning *`
+                const token = sign_token(new_user[0].id)
                 return res.status(201).json(token)
             }
-            const token = sign_token(email)
+            const token = sign_token(result[0].id)
             return res.status(200).json(token)
         })
     } catch (err) {
