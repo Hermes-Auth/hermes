@@ -3,15 +3,18 @@ import cors from "cors"
 import dotenv from "dotenv"
 dotenv.config()
 import sql from "./db"
-
+import auth_router from "./services/Authentication/router"
 const app = express()
 
 app.use(cors())
 app.use(express.json())
 
+app.use("/auth", auth_router)
+
 const PORT = process.env.PORT || 5000
 
-//Check connection to database
+
+
 app.listen(PORT, async()=>{
     try {
         const db_version = await sql`select version()`
