@@ -3,7 +3,7 @@ import cors from "cors"
 import dotenv from "dotenv"
 dotenv.config()
 import sql from "./db"
-import auth_router from "./services/Authentication/router"
+import auth_router from "./services/authentication/router"
 const app = express()
 
 app.use(cors())
