@@ -26,11 +26,11 @@ export async function get_apps( req: Request<{}, {}, { user: string }>, res: Res
     }
 }
 
-export async function deactivate( req: Request<{ app: string }, {}, { user: string, app: string, current_state: boolean }>, res: Response ){
+export async function deactivate( req: Request<{ app: string }, {}, { user: string, current_state: boolean }>, res: Response ){
     try {
         await sql`select * from apps where owner=${req.body.user} and id=${req.params.app}`.then(async result=>{
             if(result.length===0) return res.status(404).send()
-            await sql`update apps set active=${!req.body.current_state} where id=${req.body.app}`
+            await sql`update apps set active=${!req.body.current_state} where id=${req.params.app}`
             return res.status(200).send()
         })
     } catch (err) {

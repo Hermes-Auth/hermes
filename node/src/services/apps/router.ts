@@ -5,6 +5,6 @@ const app_router = Router()
 
 app_router.route("").post( auth_user, create_app )
 app_router.route("").get( auth_user,  get_apps )
-app_router.route("/:id/deactivate").post( auth_user, deactivate )
+app_router.route("/:app/deactivate").post( auth_user, deactivate )
 
 export default app_router
