@@ -1,8 +1,8 @@
 import express from "express"
 import cors from "cors"
 import dotenv from "dotenv"
-import postgres from "postgres"
 dotenv.config()
+import sql from "./db"
 
 const app = express()
 
@@ -11,15 +11,16 @@ app.use(express.json())
 
 const PORT = process.env.PORT || 5000
 
-const sql = postgres(process.env.DATABASE_URL!, { ssl:"require" })
-
-async function getPgVersion() {
-  const result = await sql`select version()`;
-  console.log(result);
-}
-
-getPgVersion();
-
-app.listen(PORT, ()=>{
+//Check connection to database
+app.listen(PORT, async()=>{
+    try {
+        const db_version = await sql`select version()`
+        const version = db_version[0].version!
+        console.log(`Connected to database ${version}`)
+    } catch (err) {
+        console.error("Failed to connect to database")
+        console.error(err)
+        process.exit(1)
+    }
     console.log(`App listening on port ${PORT}`)
 })
