@@ -5,6 +5,7 @@ dotenv.config()
 import sql from "./db"
 import auth_router from "./services/authentication/router"
 import app_router from "./services/apps/router"
+import router from "./api/router"
 const app = express()
 
 app.use(cors())
@@ -12,6 +13,7 @@ app.use(express.json())
 
 app.use("/auth", auth_router)
 app.use("/app", app_router)
+app.use("/v1", router)
 
 const PORT = process.env.PORT || 5000
 
