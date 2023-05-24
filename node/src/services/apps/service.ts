@@ -1,12 +1,12 @@
 import { Request, Response } from "express";
 import sql from "../../db";
 
-export async function create_app(req: Request<{}, {}, { user: string, name: string, active?: boolean }>, res: Response){
+export async function create_app(req: Request<{}, {}, { user: string, name: string, active?: boolean, ttl: string }>, res: Response){
     try {
-        const {user, name, active} = req.body
+        const {user, name, active, ttl} = req.body
         await sql`select * from apps where name=${name} and owner=${user}`.then(async result=>{
             if(result.length!==0) return res.status(409).send()
-            await sql`insert into apps(name, owner, active) values(${name}, ${user}, ${active ?? true})`.then(_=>{
+            await sql`insert into apps(name, owner, active, default_codes_ttl) values(${name}, ${user}, ${active ?? true}, ${ttl})`.then(_=>{
                 return res.status(201).send()
             })
         })

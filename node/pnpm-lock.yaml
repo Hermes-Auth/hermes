@@ -16,6 +16,9 @@ dependencies:
   jsonwebtoken:
     specifier: ^9.0.0
     version: 9.0.0
+  nodemailer:
+    specifier: ^6.9.2
+    version: 6.9.2
   postgres:
     specifier: ^3.3.4
     version: 3.3.4
@@ -36,6 +39,9 @@ devDependencies:
   '@types/node':
     specifier: ^18.14.1
     version: 18.14.1
+  '@types/nodemailer':
+    specifier: ^6.4.8
+    version: 6.4.8
   '@types/nodemon':
     specifier: ^1.19.2
     version: 1.19.2
@@ -143,6 +149,12 @@ packages:
 
   /@types/node@18.14.1:
     resolution: {integrity: sha512-QH+37Qds3E0eDlReeboBxfHbX9omAcBCXEzswCu6jySP642jiM3cYSIkU/REqwhCUqXdonHFuBfJDiAJxMNhaQ==}
+    dev: true
+
+  /@types/nodemailer@6.4.8:
+    resolution: {integrity: sha512-oVsJSCkqViCn8/pEu2hfjwVO+Gb3e+eTWjg3PcjeFKRItfKpKwHphQqbYmPQrlMk+op7pNNWPbsJIEthpFN/OQ==}
+    dependencies:
+      '@types/node': 18.14.1
     dev: true
 
   /@types/nodemon@1.19.2:
@@ -658,6 +670,11 @@ packages:
   /negotiator@0.6.3:
     resolution: {integrity: sha512-+EUsqGPLsM+j/zdChZjsnX51g4XrHFOIXwfnCVPGlQk/k5giakcKsuxCObBRu6DSm9opw/O6slWbJdghQM4bBg==}
     engines: {node: '>= 0.6'}
+    dev: false
+
+  /nodemailer@6.9.2:
+    resolution: {integrity: sha512-4+TYaa/e1nIxQfyw/WzNPYTEZ5OvHIDEnmjs4LPmIfccPQN+2CYKmGHjWixn/chzD3bmUTu5FMfpltizMxqzdg==}
+    engines: {node: '>=6.0.0'}
     dev: false
 
   /nodemon@2.0.22:
