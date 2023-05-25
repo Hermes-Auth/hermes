@@ -74,11 +74,13 @@ export async function verify(req: Request<{}, {}, { api_user:string }>, res: Res
             const app = row[0]
             if (!app.active) return res.status(400).send({ message: "The specified app is not active" })
             await sql`select * from codes where code=${data.code} and app=${data.app_id} and generated_for=${data.user} and used=${false}`.then(async row=>{
-                if(row.length===0) return res.status(400).send()
+                if(row.length===0) return res.status(400).send({ message:"Invalid code" })
                 const code = row[0]
-                code_is_alive(Number.parseInt(code.ttl), Number.parseInt(code.generated_at))
+                let code_alive = code_is_alive(Number.parseInt(code.ttl), Number.parseInt(code.generated_at))
+                if(!code_alive) return res.status(400).send({ message:"Invalid code 2" })
+                await sql`update codes set used=${true} where id=${code.id} `
+                return res.status(200).send()
             })
-            return res.status(200).send()
         })
     } catch (err) {
         console.error(`Error while verifying auth code ${err}`)
