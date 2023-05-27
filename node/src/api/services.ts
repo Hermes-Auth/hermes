@@ -2,7 +2,6 @@ import { Request, Response } from "express";
 import { z } from "zod"
 import sql from "../db";
 import { createTransport } from "nodemailer"
-import { markAsUntransferable } from "worker_threads";
 import { code_is_alive } from "../utils";
 const MAX = 999999
 const MIN = 100000
@@ -15,7 +14,6 @@ export async function request_code(req: Request<{}, {}, { api_user: string } & R
             ttl: z.number().int().positive().optional(),
             subject: z.string().optional()
         })
-        console.log(req.body)
         const validation_result = schema.safeParse(req.body)
         const message = "Check your request body. Some fields might be missing or have incorrect types"
         if (!validation_result.success) return res.status(400).json({ message })
