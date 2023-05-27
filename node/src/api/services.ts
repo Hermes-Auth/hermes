@@ -7,7 +7,7 @@ import { code_is_alive } from "../utils";
 const MAX = 999999
 const MIN = 100000
 
-export async function request_code(req: Request<{}, {}, { api_user: string }>, res: Response) {
+export async function request_code(req: Request<{}, {}, { api_user: string } & Record<string,string>>, res: Response) {
     try {
         const schema = z.object({
             target: z.string().email(),
@@ -15,6 +15,7 @@ export async function request_code(req: Request<{}, {}, { api_user: string }>, r
             ttl: z.number().int().positive().optional(),
             subject: z.string().optional()
         })
+        console.log(req.body)
         const validation_result = schema.safeParse(req.body)
         const message = "Check your request body. Some fields might be missing or have incorrect types"
         if (!validation_result.success) return res.status(400).json({ message })
