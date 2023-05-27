@@ -1,6 +1,7 @@
 import express from "express"
 import cors from "cors"
 import dotenv from "dotenv"
+import { Request, Response } from "express"
 dotenv.config()
 import sql from "./db"
 import auth_router from "./services/authentication/router"
@@ -15,6 +16,10 @@ app.use("/app", app_router)
 app.use("/v1", router)
 
 const PORT = process.env.PORT || 5000
+
+app.get("/health", (_: Request, res: Response)=>{
+    return res.status(200).send()
+})
 
 app.listen(PORT, async () => {
     try {
