@@ -17,8 +17,14 @@ app.use("/v1", router)
 
 const PORT = process.env.PORT || 5000
 
-app.get("/health", (_: Request, res: Response)=>{
-    return res.status(200).send()
+app.get("/health", async (_: Request, res: Response)=>{
+   try {
+        await sql`select version()`
+        return res.status(200).send()
+   } catch (err) {
+        console.error(`Server unhealthy ${err}`)
+        return res.status(500).send()
+   } 
 })
 
 app.listen(PORT, async () => {
