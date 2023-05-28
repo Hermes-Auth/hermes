@@ -10,6 +10,7 @@ export const POST = (async ({ request }) => {
 
         const transporter = createTransport({
             service: "gmail",
+            secure:true,
             auth: {
                 user: "noreply.auth.hermes@gmail.com",
                 pass: GMAIL_API_KEY
