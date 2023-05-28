@@ -43,7 +43,7 @@
 					error = 'Email and Code are required';
 					return;
 				}
-				const response = await fetch(`${API_URL}/api/v1/verify`, {
+				const response = await fetch(`${API_URL}/api/v1/authenticate`, {
 					headers: {
 						'Content-Type': 'application/json'
 					},
@@ -51,7 +51,9 @@
                     method:"POST"
 				});
 				if (response.status === 200) {
-					alert('Your account is boutta be created');
+                    const { id } = await response.json() as { id: string }
+                    localStorage.setItem("token", id)
+                    alert("You are now authenticated. Check the `Profile` tab to see your api key")
                     loading = false
 					return;
 				}

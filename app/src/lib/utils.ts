@@ -8,3 +8,4 @@ export function code_is_alive( code_ttl:number, generated_at:number ){
         throw Error("CODE_ALIVE_ERR")
     }
 }
+
