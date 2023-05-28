@@ -17,15 +17,21 @@ export const POST = (async ({ request }) => {
             }
         })
         const mailOptions = {
-            from: "noreply.auth.hermes@gmail.com",
+            from: {
+                name:"Hermes",
+                address:"noreply.auth.hermes@gmail.com"
+            },
             to: email,
             subject: "Hermes Test",
             text: `Ton code chien ${code}`
         }
-        transporter.sendMail(mailOptions).then((_)=>{
-            console.log("Success")
-        }).catch(err=>{
-            console.log(`Error while sending code ${err}`)
+        await new Promise((resolve, reject)=>{
+            transporter.sendMail(mailOptions).then((_)=>{
+                resolve("Success")
+            }).catch(err=>{
+                console.log(`Error while sending code ${err}`)
+                reject(err)
+            })
         })
         return new Response("")
     } catch (err) {
