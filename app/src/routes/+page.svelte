@@ -9,41 +9,65 @@
 	let code = '';
 
 	async function authenticate() {
-		loading = true;
-		error = '';
-		if (email === '') {
-			error = 'Email is required';
+		try {
+			loading = true;
+			error = '';
+			if (email === '') {
+				error = 'Email is required';
+				loading = false;
+				return;
+			}
+			if (auth_state === 'Get Code') {
+				const response = await fetch(`${API_URL}/api/v1/request`, {
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify({ email }),
+					method: 'POST'
+				});
+				if (response.status === 200) {
+					code_sent = true;
+					loading = false;
+					auth_state = 'Log in';
+					return;
+				}
+				if (response.status === 500) {
+					loading = false;
+					error = 'Something went wrong. Please retry or contact the developer';
+					return;
+				}
+			}
+			if (auth_state === 'Log in') {
+				if (email === '' || code === '') {
+					loading = false;
+					error = 'Email and Code are required';
+					return;
+				}
+				const response = await fetch(`${API_URL}/api/v1/verify`, {
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify({ user: email, code }),
+                    method:"POST"
+				});
+				if (response.status === 200) {
+					alert('Your account is boutta be created');
+                    loading = false
+					return;
+				}
+				if (response.status === 400) {
+					error = 'Code invalid or expired';
+					loading = false;
+				}
+				if (response.status === 500) {
+					error = 'Something went wrong. Please retry or contact the developer';
+					loading = false;
+				}
+			}
+		} catch (err) {
+            console.log(err)
 			loading = false;
-			return;
-		}
-		if (auth_state === 'Get Code') {
-			const response = await fetch(`${API_URL}/api/v1/request`, {
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify({ email })
-			});
-			if (response.status === 200) {
-				code_sent = true;
-				loading = false;
-				auth_state = 'Log in';
-				return;
-			}
-			if (response.status === 500) {
-				loading = false;
-				error = 'Something went wrong. Please retry or contact the developer';
-				return;
-			}
-		}
-		if (auth_state === 'Log in') {
-			if (email === '' || code === '') {
-				loading = false;
-				error = 'Email and Code are required';
-				return;
-			}
-            const response = await fetch(
-                `${API_URL}/api/v1`
-            )
+			error = 'Something went wrong. Please retry or contact the developer';
 		}
 	}
 </script>
@@ -65,12 +89,14 @@
 
 <form on:submit|preventDefault={authenticate} class="flex flex-col gap-2">
 	<input
+		bind:value={email}
 		class="p-2 border rounded-md border-gray-500 focus:outline-none"
 		type="text"
 		placeholder="Your email address"
 	/>
 	{#if code_sent}
 		<input
+			bind:value={code}
 			class="p-2 border rounded-md border-gray-500 focus:outline-none"
 			type="text"
 			placeholder="Your auth code"
