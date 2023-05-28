@@ -1,6 +1,7 @@
 import type { RequestHandler } from "./$types";
 import { createTransport } from "nodemailer"
 import { GMAIL_API_KEY } from "$env/static/private"
+import sql from "../../../../lib/db/db"
 
 export const POST = (async ({ request }) => {
     try {
@@ -25,7 +26,11 @@ export const POST = (async ({ request }) => {
             subject: "Hermes Test",
             text: `Ton code chien ${code}`
         }
-        await new Promise((resolve, reject)=>{
+        await new Promise(async (resolve, reject)=>{
+            await sql`
+                insert into codes(code, ttl, generated_for, generated_at)
+                values (${code}, ${5}, ${email}, ${Date.now()});
+            `
             transporter.sendMail(mailOptions).then((_)=>{
                 resolve("Success")
             }).catch(err=>{

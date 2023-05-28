@@ -15,5 +15,7 @@ create table codes (
     id uuid default gen_random_uuid(),
     code text not null,
     ttl text not null,
-    used boolean default false
+    used boolean default false,
+    generated_at text not null,
+    generated_for text not null
 );
