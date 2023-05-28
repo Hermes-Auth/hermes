@@ -64,8 +64,9 @@
 				if (response.status === 200) {
 					const { id } = (await response.json()) as { id: string };
 					localStorage.setItem('token', id);
+                    loading = false;
 					alert('You are now authenticated. Check the `Profile` tab to see your api key');
-					loading = false;
+                    user_is_logged_in.set(true)
 					return;
 				}
 				if (response.status === 400) {
@@ -88,6 +89,20 @@
 		localStorage.removeItem('token');
 		user_is_logged_in.set(false);
 	}
+	const steps: { link: string; description: string }[] = [
+		{
+			link: '#create-account',
+			description: 'Create or log in your developer account'
+		},
+		{
+			link: '/profiles',
+			description: 'Check out your profile'
+		},
+		{
+			link: '/apps',
+			description: 'Create and manage your apps'
+		}
+	];
 </script>
 
 <h1 class="hover:underline text-xl font-bold"># Welcome to Hermes documentation</h1>
@@ -98,10 +113,17 @@
 </h1>
 
 <h1 id="#create-account" class="hover:underline mt-5 text-xl font-bold"># How it works</h1>
+<ol>
+	{#each steps as step}
+		<li>
+			<a href={step.link} class="text-blue-500 underline">{step.description}</a>
+		</li>
+	{/each}
+</ol>
 
 <!--be back-->
 
-<h1 id="#create-account" class="hover:underline mt-5 text-xl font-bold">
+<h1 id="#create-account" class="hover:underline my-5 text-xl font-bold">
 	# Creating your developer account
 </h1>
 
