@@ -1,5 +1,16 @@
 <script lang="ts">
 	import LoadingIcon from '../components/LoadingIcon.svelte';
+	import { user_is_logged_in } from '$lib/store';
+	import { onMount } from 'svelte';
+	import { browser } from '$app/environment';
+	onMount(() => {
+		if (browser) {
+			const token = localStorage.getItem('token') ?? '';
+			if (token !== '') {
+				user_is_logged_in.set(true);
+			}
+		}
+	});
 	const API_URL = 'http://localhost:5173';
 	let loading = false;
 	let error = '';
@@ -48,13 +59,13 @@
 						'Content-Type': 'application/json'
 					},
 					body: JSON.stringify({ user: email, code }),
-                    method:"POST"
+					method: 'POST'
 				});
 				if (response.status === 200) {
-                    const { id } = await response.json() as { id: string }
-                    localStorage.setItem("token", id)
-                    alert("You are now authenticated. Check the `Profile` tab to see your api key")
-                    loading = false
+					const { id } = (await response.json()) as { id: string };
+					localStorage.setItem('token', id);
+					alert('You are now authenticated. Check the `Profile` tab to see your api key');
+					loading = false;
 					return;
 				}
 				if (response.status === 400) {
@@ -67,10 +78,15 @@
 				}
 			}
 		} catch (err) {
-            console.log(err)
+			console.log(err);
 			loading = false;
 			error = 'Something went wrong. Please retry or contact the developer';
 		}
+	}
+
+	function logout() {
+		localStorage.removeItem('token');
+		user_is_logged_in.set(false);
 	}
 </script>
 
@@ -89,32 +105,39 @@
 	# Creating your developer account
 </h1>
 
-<form on:submit|preventDefault={authenticate} class="flex flex-col gap-2">
-	<input
-		bind:value={email}
-		class="p-2 border rounded-md border-gray-500 focus:outline-none"
-		type="text"
-		placeholder="Your email address"
-	/>
-	{#if code_sent}
+{#if !$user_is_logged_in}
+	<form on:submit|preventDefault={authenticate} class="flex flex-col gap-2">
 		<input
-			bind:value={code}
+			bind:value={email}
 			class="p-2 border rounded-md border-gray-500 focus:outline-none"
 			type="text"
-			placeholder="Your auth code"
+			placeholder="Your email address"
 		/>
-	{/if}
-	<span class="text-center text-red-600 text-xs">{error}</span>
-	<button
-		disabled={loading}
-		class={`${
-			loading ? 'bg-gray-500' : 'bg-gray-700'
-		} flex justify-center p-2 rounded-md text-white`}
-	>
-		{#if loading}
-			<LoadingIcon />
-		{:else}
-			{auth_state}
+		{#if code_sent}
+			<input
+				bind:value={code}
+				class="p-2 border rounded-md border-gray-500 focus:outline-none"
+				type="text"
+				placeholder="Your auth code"
+			/>
 		{/if}
-	</button>
-</form>
+		<span class="text-center text-red-600 text-xs">{error}</span>
+		<button
+			disabled={loading}
+			class={`${
+				loading ? 'bg-gray-500' : 'bg-gray-700'
+			} flex justify-center p-2 rounded-md text-white`}
+		>
+			{#if loading}
+				<LoadingIcon />
+			{:else}
+				{auth_state}
+			{/if}
+		</button>
+	</form>
+{:else}
+	<h1 class="text-center">You are logged in</h1>
+	<button on:click={logout} class=" bg-red-600 w-full flex justify-center p-2 rounded-md text-white"
+		>Log out</button
+	>
+{/if}
