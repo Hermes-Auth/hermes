@@ -21,11 +21,10 @@ export const POST = (async ({ request }) => {
             subject: "Hermes Test",
             text: `Ton code chien ${code}`
         }
-        transporter.sendMail(mailOptions, async (err, _) => {
-            if (err) {
-                console.log(err)
-                return new Response("", { status: 500 })
-            }
+        transporter.sendMail(mailOptions).then((_)=>{
+            console.log("Success")
+        }).catch(err=>{
+            console.log(`Error while sending code ${err}`)
         })
         return new Response("")
     } catch (err) {
