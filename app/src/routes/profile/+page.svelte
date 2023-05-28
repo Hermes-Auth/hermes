@@ -15,7 +15,7 @@
 	}
     function hide_api_key(key:string){
             let str = ""
-            for (const char of key) {
+            for (const _ of key) {
                 str+="*"
             }
             return str
