@@ -4,7 +4,9 @@
 	import Copy from '../../components/Copy.svelte';
 	import LoadingIcon from '../../components/LoadingIcon.svelte';
 	import { browser } from '$app/environment';
+    import { current_tab } from '$lib/store';
 	onMount(async () => {
+        current_tab.set("profile")
 		if (browser) {
 			try {
 				const token = localStorage.getItem('token') ?? '';

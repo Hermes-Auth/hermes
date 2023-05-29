@@ -3,7 +3,9 @@
 	import { user_is_logged_in } from '$lib/store';
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
+    import { current_tab } from '$lib/store';
 	onMount(() => {
+        current_tab.set("auth")
 		if (browser) {
 			const token = localStorage.getItem('token') ?? '';
 			if (token !== '') {
@@ -95,7 +97,7 @@
 			description: 'Create or log in your developer account'
 		},
 		{
-			link: '/profiles',
+			link: '/profile',
 			description: 'Check out your profile'
 		},
 		{
