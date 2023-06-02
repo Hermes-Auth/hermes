@@ -13,6 +13,8 @@ serde_derive = "1.0.9"
 rand = "0.8.5"
 url = "2.3.1"
 vercel_runtime = "0.3.4"
+lettre = "0.10.4"
+postgres = "0.19.5"
 
 [lib]
 path = "src-rs/lib.rs"
@@ -23,5 +25,4 @@ path = "api/basic.rs"
 
 [[bin]]
 name = "auth"
-path = "api/auth/test.rs"
-
+path = "api/auth/request.rs"
