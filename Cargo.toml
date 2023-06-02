@@ -24,5 +24,9 @@ name = "simple"
 path = "api/basic.rs"
 
 [[bin]]
-name = "auth"
+name = "request auth"
 path = "api/auth/request.rs"
+
+[[bin]]
+name = "claim auth"
+path = "api/auth/verify.rs"
