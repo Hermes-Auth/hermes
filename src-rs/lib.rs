@@ -1,3 +1,4 @@
+pub mod redis;
 extern crate lettre;
 
 use lettre::message::header::ContentType;
@@ -23,19 +24,17 @@ pub fn send_mail(receiver: String, text: String, subject: String) -> bool {
         .credentials(creds)
         .build();
     match mailer.send(&email) {
-        Ok(_)=>{
-            true
-        },
-        Err(err)=>{
+        Ok(_) => true,
+        Err(err) => {
             println!("Error while sending mail {err}");
             false
         }
     }
 }
 
-pub fn respond( status_code: StatusCode ) -> Result<Response<Body>, Error> {
+pub fn respond(status_code: StatusCode, data: String) -> Result<Response<Body>, Error> {
     Ok(Response::builder()
-       .status(status_code)
-       .header("Content-Type","application/json")
-       .body(json!({}).to_string().into())?)
+        .status(status_code)
+        .header("Content-Type", "application/json")
+        .body(json!({"data":data}).to_string().into())?)
 }
