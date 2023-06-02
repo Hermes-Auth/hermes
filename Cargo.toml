@@ -21,3 +21,7 @@ path = "src-rs/lib.rs"
 name = "simple"
 path = "api/basic.rs"
 
+[[bin]]
+name = "auth"
+path = "api/auth/test.rs"
+
