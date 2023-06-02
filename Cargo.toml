@@ -19,12 +19,5 @@ path = "src-rs/lib.rs"
 
 [[bin]]
 name = "simple"
-path = "api/simple.rs"
+path = "api/basic.rs"
 
-[[bin]]
-name = "complex"
-path = "api/complex.rs"
-
-[[bin]]
-name = "_id_"
-path = "api/user/[id].rs"

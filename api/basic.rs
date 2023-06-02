@@ -1,4 +1,5 @@
 use vercel_runtime::{run, Body, Error, Request, Response, StatusCode};
+use serde_json::json;
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
