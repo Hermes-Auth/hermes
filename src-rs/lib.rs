@@ -3,6 +3,8 @@ extern crate lettre;
 use lettre::message::header::ContentType;
 use lettre::transport::smtp::authentication::Credentials;
 use lettre::{Message, SmtpTransport, Transport};
+use serde_json::json;
+use vercel_runtime::{Body, Error, Response, StatusCode};
 
 pub fn send_mail(receiver: String, text: String, subject: String) -> bool {
     let email = Message::builder()
@@ -29,4 +31,11 @@ pub fn send_mail(receiver: String, text: String, subject: String) -> bool {
             false
         }
     }
+}
+
+pub fn respond( status_code: StatusCode ) -> Result<Response<Body>, Error> {
+    Ok(Response::builder()
+       .status(status_code)
+       .header("Content-Type","application/json")
+       .body(json!({}).to_string().into())?)
 }

@@ -1,5 +1,5 @@
 [package]
-name = "simple_runtime_demo"
+name = "hermes"
 version = "0.1.0"
 edition = "2021"
 
@@ -14,7 +14,7 @@ rand = "0.8.5"
 url = "2.3.1"
 vercel_runtime = "0.3.4"
 lettre = "0.10.4"
-postgres = "0.19.5"
+reqwest = "0.11.18"
 
 [lib]
 path = "src-rs/lib.rs"
