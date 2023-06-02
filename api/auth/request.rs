@@ -1,4 +1,4 @@
-use hermes::{respond, send_mail, redis::{ get_key, set_key }};
+use hermes::{respond, send_mail, redis::set_key, generate_code};
 use serde::Deserialize;
 use vercel_runtime::{run, Body, Error, Request, Response, StatusCode};
 
@@ -17,11 +17,10 @@ pub async fn handler(req: Request) -> Result<Response<Body>, Error> {
         if let Ok(string_body) = String::from_utf8(binary_body.to_owned()) {
             if let Ok(payload) = serde_json::from_str::<Payload>(&string_body) {
                 let email = payload.email;
-                let text = String::from("006006");
-                let redis_test = get_key("Something".to_string()).await;
+                let text = generate_code();
                 let subject = String::from("Your Hermes authentication code");
                 if send_mail(email, text, subject) {
-                    respond(StatusCode::OK, redis_test)
+                    respond(StatusCode::OK, "".to_string())
                 } else {
                     respond(StatusCode::INTERNAL_SERVER_ERROR, "".to_string())
                 }

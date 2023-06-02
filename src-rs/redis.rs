@@ -1,4 +1,4 @@
-use reqwest;
+use reqwest::{self, StatusCode};
 use std::{env::var, format };
 
 pub async fn get_key(key: String) -> String {
@@ -31,7 +31,7 @@ pub async fn get_key(key: String) -> String {
 
 pub async fn set_key(key: String, value: String) -> String {
     let redis_url = var("REDIS_URL").unwrap();
-    let command = format!("{redis_url}/set/{key}/{value}");
+    let command = format!("{redis_url}/setx/{key}/300/{value}");
     let redis_token = var("REDIS_TOKEN").unwrap();
     let result = reqwest::Client::new()
         .get(command)
@@ -40,6 +40,14 @@ pub async fn set_key(key: String, value: String) -> String {
         .await;
     match result{
         Ok(response)=>{
+            match response.status() {
+                StatusCode::OK=>{
+
+                },
+                _=>{
+
+                }
+            }
             match response.text().await {
                 Ok(text)=>{
                     text
@@ -55,5 +63,4 @@ pub async fn set_key(key: String, value: String) -> String {
             "".to_string()
         }
     }
-
 }
