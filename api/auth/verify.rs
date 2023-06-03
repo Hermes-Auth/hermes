@@ -28,11 +28,29 @@ pub async fn handler(req: Request) -> Result<Response<Body>, Error> {
                         StatusCode::BAD_REQUEST,
                         "Something went wrong while verifying your code".to_string(),
                     ),
-                    value  => {
-                        if let Ok(redis_value) = serde_json::from_str::<RedisValue>(value){
-                            respond(StatusCode::OK, redis_value.result.to_string())
-                        }else {
-                            respond(StatusCode::INTERNAL_SERVER_ERROR, "Failed to parse redis data".to_string())
+                    value => {
+                        if let Ok(redis_value) = serde_json::from_str::<RedisValue>(value) {
+                            match redis_value.result {
+                                Value::Null => {
+                                    respond(StatusCode::BAD_REQUEST, "Invalid code".to_string())
+                                }
+                                Value::String(code) => {
+                                    if payload.code == code {
+                                        respond(StatusCode::OK, "".to_string())
+                                    } else {
+                                        respond(StatusCode::BAD_REQUEST, "Invalid code".to_string())
+                                    }
+                                }
+                                _ => respond(
+                                    StatusCode::INTERNAL_SERVER_ERROR,
+                                    "Something went wrong".to_string(),
+                                ),
+                            }
+                        } else {
+                            respond(
+                                StatusCode::INTERNAL_SERVER_ERROR,
+                                "Failed to parse redis data".to_string(),
+                            )
                         }
                     }
                 }
