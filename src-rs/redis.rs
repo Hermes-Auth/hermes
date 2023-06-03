@@ -1,9 +1,10 @@
 use reqwest::{self, StatusCode};
-use std::{env::var, format };
+use std::{env::var, format, println };
 
 pub async fn get_key(key: String) -> String {
    let redis_url = var("REDIS_URL").unwrap();
    let command = format!("{redis_url}/get/{key}");
+   println!("{command}");
    let redis_token = var("REDIS_TOKEN").unwrap();
    let result = reqwest::Client::new()
        .get(command)
