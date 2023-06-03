@@ -1,4 +1,5 @@
 pub mod redis;
+pub mod pg;
 extern crate lettre;
 
 use lettre::message::header::ContentType;
