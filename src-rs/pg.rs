@@ -107,11 +107,11 @@ pub async fn fetch_api_key(email: String) -> (String, bool) {
     }
 }
 
-pub async fn api_key_is_valid(api_key: &str) -> PgResult {
+pub async fn api_key_is_valid(user_api_key: &str) -> PgResult {
     let api_key = var("SUPABASE_KEY").unwrap();
     let db_url = var("SUPABASE_URL").unwrap();
     let request = Client::new()
-        .get(format!("{db_url}/rest/v1/users?api_key=eq.{api_key}"))
+        .get(format!("{db_url}/rest/v1/users?api_key=eq.{user_api_key}"))
         .header("apiKey", api_key)
         .send()
         .await;
