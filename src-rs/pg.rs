@@ -139,7 +139,7 @@ pub async fn api_key_is_valid(api_key: &str) -> PgResult {
     }
 }
 
-pub async fn create_app(name: &str, user_api_key: &str) -> bool {
+pub async fn create_app(name: &str, user_api_key: &str, default_ttl: &str ) -> bool {
     match api_key_is_valid(user_api_key).await {
         PgResult::YESSIR => {
             let api_key = var("SUPABASE_KEY").unwrap();
@@ -147,6 +147,7 @@ pub async fn create_app(name: &str, user_api_key: &str) -> bool {
             let mut body = HashMap::new();
             body.insert("name", name);
             body.insert("owner", user_api_key);
+            body.insert("default_ttl", default_ttl);
             let request = Client::new()
                 .post(format!("{db_url}/rest/v1/apps"))
                 .header("apiKey", api_key)

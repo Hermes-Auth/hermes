@@ -6,7 +6,8 @@ use serde_json;
 #[derive(Deserialize)]
 struct App{
     name: String,
-    owner: String
+    owner: String,
+    default_ttl: String
 }
 
 #[tokio::main]
@@ -18,7 +19,7 @@ pub async fn handler(req: Request) -> Result<Response<Body>, Error> {
     if let Body::Binary(binary_body) = req.body(){
         if let Ok(string_body) = String::from_utf8(binary_body.to_owned()){
             if let Ok(payload) = serde_json::from_str::<App>(&string_body){
-                if create_app(&payload.name, &payload.owner.to_owned()).await {
+                if create_app(&payload.name, &payload.owner.to_owned(), &payload.default_ttl).await {
                     respond(StatusCode::CREATED, "".to_string())
                 }else {
                     respond(StatusCode::BAD_REQUEST, "".to_string())
