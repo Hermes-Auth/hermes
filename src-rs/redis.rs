@@ -29,12 +29,12 @@ pub async fn get_key(key: String) -> String {
    }
 }
 
-pub async fn setx_key(key: String, value: String, expiration: String) -> bool {
+pub async fn setex_key(key: String, value: String, expiration: String) -> bool {
     let redis_url = var("REDIS_URL").unwrap();
-    let command = format!("{redis_url}/setx/{key}/{expiration}/{value}");
+    let command = format!("{redis_url}/setex/{key}/{expiration}/{value}");
     let redis_token = var("REDIS_TOKEN").unwrap();
     let result = reqwest::Client::new()
-        .get(command)
+        .post(command)
         .header("Authorization", format!("Bearer {redis_token}"))
         .send()
         .await;
@@ -45,7 +45,6 @@ pub async fn setx_key(key: String, value: String, expiration: String) -> bool {
                     true
                 },
                 _=>{
-                    print!("Received something else");
                     false
                 }
             }
