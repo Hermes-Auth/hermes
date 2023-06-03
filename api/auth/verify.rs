@@ -1,5 +1,3 @@
-use std::println;
-
 use hermes::{redis::get_key, respond};
 use serde::Deserialize;
 use serde_json::Value;
@@ -25,14 +23,12 @@ pub async fn handler(req: Request) -> Result<Response<Body>, Error> {
     if let Body::Binary(binary_body) = req.body() {
         if let Ok(string_body) = String::from_utf8(binary_body.to_owned()) {
             if let Ok(payload) = serde_json::from_str::<Payload>(&string_body) {
-                println!("{}", &payload.code);
                 match get_key(format!("auth:{}", payload.email)).await.as_str() {
                     "" => respond(
                         StatusCode::BAD_REQUEST,
                         "Something went wrong while verifying your code".to_string(),
                     ),
                     value => {
-                        println!("{value}");
                         if let Ok(redis_value) = serde_json::from_str::<RedisValue>(value) {
                             match redis_value.result {
                                 Value::Null => {
