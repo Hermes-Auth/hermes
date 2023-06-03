@@ -1,4 +1,8 @@
-use hermes::{ redis::get_key, respond, pg::{ PgResult, user_exists, fetch_api_key }};
+use hermes::{
+    pg::{create_user, fetch_api_key, user_exists, PgResult},
+    redis::get_key,
+    respond,
+};
 use serde::Deserialize;
 use serde_json::Value;
 use vercel_runtime::{run, Body, Error, Request, Response, StatusCode};
@@ -31,29 +35,55 @@ pub async fn handler(req: Request) -> Result<Response<Body>, Error> {
                     value => {
                         if let Ok(redis_value) = serde_json::from_str::<RedisValue>(value) {
                             match redis_value.result {
-                                Value::Null => {
-                                    respond(StatusCode::BAD_REQUEST, "Invalid code. Code not found".to_string())
-                                }
+                                Value::Null => respond(
+                                    StatusCode::BAD_REQUEST,
+                                    "Invalid code. Code not found".to_string(),
+                                ),
                                 Value::String(code) => {
                                     if payload.code == code {
                                         match user_exists(payload.email.to_owned()).await {
-                                            PgResult::YESSIR =>{
-                                                let (data, result) = fetch_api_key(payload.email.to_owned()).await;
+                                            PgResult::YESSIR => {
+                                                let (data, result) =
+                                                    fetch_api_key(payload.email.to_owned()).await;
                                                 if result {
                                                     respond(StatusCode::OK, data)
-                                                }else {
-                                                    respond(StatusCode::INTERNAL_SERVER_ERROR, "Something went wrong".to_string())
+                                                } else {
+                                                    respond(
+                                                        StatusCode::INTERNAL_SERVER_ERROR,
+                                                        "Something went wrong".to_string(),
+                                                    )
                                                 }
-                                            },
-                                            PgResult::NOPE =>{
-                                                respond(StatusCode::OK, "NOPE".to_string())
-                                            },
-                                            PgResult::SumnAintRight =>{
-                                                respond(StatusCode::INTERNAL_SERVER_ERROR, "Something went wrong".to_string())
                                             }
+                                            PgResult::NOPE => {
+                                                if create_user(payload.email.to_owned()).await {
+                                                    let (data, result) =
+                                                        fetch_api_key(payload.email.to_owned())
+                                                            .await;
+                                                    if result {
+                                                        respond(StatusCode::OK, data)
+                                                    } else {
+                                                        respond(
+                                                            StatusCode::INTERNAL_SERVER_ERROR,
+                                                            "".to_string(),
+                                                        )
+                                                    }
+                                                } else {
+                                                    respond(
+                                                        StatusCode::INTERNAL_SERVER_ERROR,
+                                                        "".to_string(),
+                                                    )
+                                                }
+                                            }
+                                            PgResult::SumnAintRight => respond(
+                                                StatusCode::INTERNAL_SERVER_ERROR,
+                                                "Something went wrong".to_string(),
+                                            ),
                                         }
                                     } else {
-                                        respond(StatusCode::BAD_REQUEST, format!("Invalid code {code} {}", payload.code))
+                                        respond(
+                                            StatusCode::BAD_REQUEST,
+                                            format!("Invalid code {code} {}", payload.code),
+                                        )
                                     }
                                 }
                                 _ => respond(
