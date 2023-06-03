@@ -45,6 +45,7 @@ pub async fn setx_key(key: String, value: String, expiration: String) -> bool {
                     true
                 },
                 _=>{
+                    print!("Received something else");
                     false
                 }
             }
