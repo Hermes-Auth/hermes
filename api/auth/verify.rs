@@ -1,4 +1,4 @@
-use hermes::{redis::get_key, respond};
+use hermes::{send_mail, redis::get_key, respond, pg::{ PgResult, User, user_exists, create_user }};
 use serde::Deserialize;
 use serde_json::Value;
 use vercel_runtime::{run, Body, Error, Request, Response, StatusCode};
@@ -36,7 +36,20 @@ pub async fn handler(req: Request) -> Result<Response<Body>, Error> {
                                 }
                                 Value::String(code) => {
                                     if payload.code == code {
-                                        respond(StatusCode::OK, "".to_string())
+                                        match user_exists(payload.email.to_owned()).await {
+                                            PgResult::YESSIR =>{
+                                                //Get user
+                                                println!("User exists. Fetch and return");
+                                            },
+                                            PgResult::NOPE =>{
+                                                if create_user(payload.email.to_owned()).await {
+
+                                                }
+                                            },
+                                            PgResult::SumnAintRight =>{
+                                                respond(StatusCode::INTERNAL_SERVER_ERROR, "Something went wrong".to_string())
+                                            }
+                                        }
                                     } else {
                                         respond(StatusCode::BAD_REQUEST, format!("Invalid code {code} {}", payload.code))
                                     }

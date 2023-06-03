@@ -9,6 +9,11 @@ pub struct User {
     pub api_key: String,
 }
 
+#[derive(Deserialize)]
+pub struct UserKey {
+    pub api_key: String,
+}
+
 pub enum PgResult {
     NOPE,
     YESSIR,
@@ -67,5 +72,41 @@ pub async fn user_exists(email: String) -> PgResult {
         }
     } else {
         PgResult::SumnAintRight
+    }
+}
+
+pub async fn fetch_api_key(email: String) -> (String, bool) {
+    let api_key = var("SUPABASE_KEY").unwrap();
+    let db_url = var("SUPABASE_URL").unwrap();
+    let mut body = HashMap::new();
+    body.insert("email", &email);
+    let request = Client::new()
+        .get(format!("{db_url}/rest/v1/users?select=api_key&email=eq.{email}"))
+        .header("apiKey", api_key)
+        .send()
+        .await;
+    if let Ok(response) = request{
+        match response.status() {
+            StatusCode::OK =>{
+                if let Ok(body) = response.text().await {
+                    if let Ok(data) = serde_json::from_str::<Vec<UserKey>>(&body){
+                        if data.len() == 0 {
+                            ("".to_string(), false)
+                        }else {
+                            (data[0].api_key.to_owned(), true)
+                        }
+                    }else {
+                        ("".to_string(), false)
+                    }
+                } else {
+                    ("".to_string(), false)
+                }
+            },
+            _ =>{
+                ("".to_string(), false)
+            }
+        }
+    }else {
+        ("".to_string(), false)
     }
 }
