@@ -1,3 +1,4 @@
+
 use hermes::{redis::get_key, respond};
 use serde::Deserialize;
 use serde_json::Value;
@@ -32,13 +33,13 @@ pub async fn handler(req: Request) -> Result<Response<Body>, Error> {
                         if let Ok(redis_value) = serde_json::from_str::<RedisValue>(value) {
                             match redis_value.result {
                                 Value::Null => {
-                                    respond(StatusCode::BAD_REQUEST, "Invalid code".to_string())
+                                    respond(StatusCode::BAD_REQUEST, "Invalid code. Code not found".to_string())
                                 }
                                 Value::String(code) => {
                                     if payload.code == code {
                                         respond(StatusCode::OK, "".to_string())
                                     } else {
-                                        respond(StatusCode::BAD_REQUEST, "Invalid code".to_string())
+                                        respond(StatusCode::BAD_REQUEST, format!("Invalid code {code} {}", payload.code))
                                     }
                                 }
                                 _ => respond(
