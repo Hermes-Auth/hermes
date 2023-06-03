@@ -29,9 +29,9 @@ pub async fn get_key(key: String) -> String {
    }
 }
 
-pub async fn set_key(key: String, value: String) -> String {
+pub async fn setx_key(key: String, value: String, expiration: String) -> bool {
     let redis_url = var("REDIS_URL").unwrap();
-    let command = format!("{redis_url}/setx/{key}/300/{value}");
+    let command = format!("{redis_url}/setx/{key}/{expiration}/{value}");
     let redis_token = var("REDIS_TOKEN").unwrap();
     let result = reqwest::Client::new()
         .get(command)
@@ -42,25 +42,16 @@ pub async fn set_key(key: String, value: String) -> String {
         Ok(response)=>{
             match response.status() {
                 StatusCode::OK=>{
-
+                    true
                 },
                 _=>{
-
-                }
-            }
-            match response.text().await {
-                Ok(text)=>{
-                    text
-                },
-                Err(err)=>{
-                    println!("Error while reading response body {err}");
-                    "".to_string()
+                    false
                 }
             }
         },
         Err(err)=>{
             println!("Error while sending http request {err}");
-            "".to_string()
+            false
         }
     }
 }
