@@ -16,10 +16,6 @@ pub enum AuthRequestResult {
     InvalidKeyErr
 }
 
-pub fn request_auth_for_user( api_key: &str, target: &str, app: &str, subject: Option<&str> ){
-
-}
-
 pub fn send_mail(receiver: String, text: String, subject: String) -> bool {
     let email = Message::builder()
         .from("pigeondev01@gmail.com".parse().unwrap())
