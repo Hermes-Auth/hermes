@@ -34,13 +34,20 @@ pub fn send_mail(receiver: String, text: String, subject: String) -> bool {
     }
 }
 
-pub fn respond(status_code: StatusCode, data: String) -> Result<Response<Body>, Error> {
+pub fn respond(status_code: StatusCode) -> Result<Response<Body>, Error> {
     Ok(Response::builder()
         .status(status_code)
-        .header("Content-Type", "application/json")
-        .body(json!({"data":data}).to_string().into())?)
+        .body(json!("").to_string().into())?)
 }
 
 pub fn generate_code() -> String{
     rand::thread_rng().gen_range(100_000..1_000_000).to_string()
+}
+
+
+pub fn respond_with_body(status_code: StatusCode, data: String) -> Result<Response<Body>, Error> {
+    Ok(Response::builder()
+        .status(status_code)
+        .header("Content-Type", "application/json")
+        .body(json!({"data":data}).to_string().into())?)
 }

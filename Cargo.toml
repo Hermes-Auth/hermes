@@ -34,3 +34,7 @@ path = "api/auth/verify.rs"
 [[bin]]
 name = "create_app"
 path = "api/apps/create.rs"
+
+[[bin]]
+name = "request_auth_for_user"
+path = "api/request.rs"

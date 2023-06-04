@@ -1,7 +1,7 @@
 use hermes::{
     pg::{create_user, fetch_api_key, user_exists, PgResult},
     redis::get_key,
-    respond,
+    respond, respond_with_body,
 };
 use serde::Deserialize;
 use serde_json::Value;
@@ -28,17 +28,11 @@ pub async fn handler(req: Request) -> Result<Response<Body>, Error> {
         if let Ok(string_body) = String::from_utf8(binary_body.to_owned()) {
             if let Ok(payload) = serde_json::from_str::<Payload>(&string_body) {
                 match get_key(format!("auth:{}", payload.email)).await.as_str() {
-                    "" => respond(
-                        StatusCode::BAD_REQUEST,
-                        "Something went wrong while verifying your code".to_string(),
-                    ),
+                    "" => respond(StatusCode::BAD_REQUEST),
                     value => {
                         if let Ok(redis_value) = serde_json::from_str::<RedisValue>(value) {
                             match redis_value.result {
-                                Value::Null => respond(
-                                    StatusCode::BAD_REQUEST,
-                                    "Invalid code. Code not found".to_string(),
-                                ),
+                                Value::Null => respond(StatusCode::BAD_REQUEST),
                                 Value::String(code) => {
                                     if payload.code == code {
                                         match user_exists(payload.email.to_owned()).await {
@@ -46,12 +40,9 @@ pub async fn handler(req: Request) -> Result<Response<Body>, Error> {
                                                 let (data, result) =
                                                     fetch_api_key(payload.email.to_owned()).await;
                                                 if result {
-                                                    respond(StatusCode::OK, data)
+                                                    respond_with_body(StatusCode::OK, data)
                                                 } else {
-                                                    respond(
-                                                        StatusCode::INTERNAL_SERVER_ERROR,
-                                                        "Something went wrong".to_string(),
-                                                    )
+                                                    respond(StatusCode::INTERNAL_SERVER_ERROR)
                                                 }
                                             }
                                             PgResult::NOPE => {
@@ -60,52 +51,36 @@ pub async fn handler(req: Request) -> Result<Response<Body>, Error> {
                                                         fetch_api_key(payload.email.to_owned())
                                                             .await;
                                                     if result {
-                                                        respond(StatusCode::OK, data)
+                                                        respond_with_body(StatusCode::OK, data)
                                                     } else {
-                                                        respond(
-                                                            StatusCode::INTERNAL_SERVER_ERROR,
-                                                            "".to_string(),
-                                                        )
+                                                        respond(StatusCode::INTERNAL_SERVER_ERROR)
                                                     }
                                                 } else {
-                                                    respond(
-                                                        StatusCode::INTERNAL_SERVER_ERROR,
-                                                        "".to_string(),
-                                                    )
+                                                    respond(StatusCode::INTERNAL_SERVER_ERROR)
                                                 }
                                             }
-                                            PgResult::SumnAintRight => respond(
-                                                StatusCode::INTERNAL_SERVER_ERROR,
-                                                "Something went wrong".to_string(),
-                                            ),
+                                            PgResult::SumnAintRight => {
+                                                respond(StatusCode::INTERNAL_SERVER_ERROR)
+                                            }
                                         }
                                     } else {
-                                        respond(
-                                            StatusCode::BAD_REQUEST,
-                                            format!("Invalid code {code} {}", payload.code),
-                                        )
+                                        respond(StatusCode::BAD_REQUEST)
                                     }
                                 }
-                                _ => respond(
-                                    StatusCode::INTERNAL_SERVER_ERROR,
-                                    "Something went wrong".to_string(),
-                                ),
+                                _ => respond(StatusCode::INTERNAL_SERVER_ERROR),
                             }
                         } else {
-                            respond(
-                                StatusCode::INTERNAL_SERVER_ERROR,
-                                "Failed to parse redis data".to_string(),
-                            )
+                            respond(StatusCode::INTERNAL_SERVER_ERROR)
                         }
                     }
                 }
             } else {
-                respond(StatusCode::BAD_REQUEST, "Failed to parse body".to_string())
+                respond(StatusCode::BAD_REQUEST)
             }
         } else {
-            respond(StatusCode::BAD_REQUEST, "".to_string())
+            respond(StatusCode::BAD_REQUEST)
         }
     } else {
-        respond(StatusCode::UNSUPPORTED_MEDIA_TYPE, "".to_string())
+        respond(StatusCode::UNSUPPORTED_MEDIA_TYPE)
     }
 }

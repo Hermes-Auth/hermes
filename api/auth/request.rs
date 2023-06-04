@@ -22,26 +22,25 @@ pub async fn handler(req: Request) -> Result<Response<Body>, Error> {
                 let code = generate_code();
                 if !setex_key(format!("auth:{email}"), code.to_owned(), "300".to_string()).await {
                     respond(
-                        StatusCode::INTERNAL_SERVER_ERROR,
-                        "Error while sending code to auth user".to_string(),
+                        StatusCode::INTERNAL_SERVER_ERROR
                     )
                 } else {
                     let text =
                         format!("{code} <br> This code will remain valid for the next 5 minutes ");
                     let subject = String::from("Your Hermes authentication code");
                     if send_mail(email, text, subject) {
-                        respond(StatusCode::OK, "".to_string())
+                        respond(StatusCode::OK)
                     } else {
-                        respond(StatusCode::INTERNAL_SERVER_ERROR, "".to_string())
+                        respond(StatusCode::INTERNAL_SERVER_ERROR)
                     }
                 }
             } else {
-                respond(StatusCode::BAD_REQUEST, "".to_string())
+                respond(StatusCode::BAD_REQUEST)
             }
         } else {
-            respond(StatusCode::BAD_REQUEST, "".to_string())
+            respond(StatusCode::BAD_REQUEST)
         }
     } else {
-        respond(StatusCode::UNSUPPORTED_MEDIA_TYPE, "".to_string())
+        respond(StatusCode::UNSUPPORTED_MEDIA_TYPE)
     }
 }

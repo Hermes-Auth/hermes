@@ -29,17 +29,17 @@ pub async fn handler(req: Request) -> Result<Response<Body>, Error> {
                 )
                 .await
                 {
-                    CreateAppResult::OK => respond(StatusCode::OK, "".to_string()),
-                    CreateAppResult::CONFLICT => respond(StatusCode::CONFLICT, "".to_string()),
-                    _ => respond(StatusCode::INTERNAL_SERVER_ERROR, "".to_string()),
+                    CreateAppResult::OK => respond(StatusCode::OK),
+                    CreateAppResult::CONFLICT => respond(StatusCode::CONFLICT),
+                    _ => respond(StatusCode::INTERNAL_SERVER_ERROR),
                 }
             } else {
-                respond(StatusCode::BAD_REQUEST, "".to_string())
+                respond(StatusCode::BAD_REQUEST)
             }
         } else {
-            respond(StatusCode::INTERNAL_SERVER_ERROR, "".to_string())
+            respond(StatusCode::INTERNAL_SERVER_ERROR)
         }
     } else {
-        respond(StatusCode::UNSUPPORTED_MEDIA_TYPE, "".to_string())
+        respond(StatusCode::UNSUPPORTED_MEDIA_TYPE)
     }
 }
