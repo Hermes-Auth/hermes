@@ -53,7 +53,7 @@ pub async fn handler(req: Request) -> Result<Response<Body>, Error> {
                                                                 let found_app = data.first().unwrap();
                                                                 let code = generate_code();
                                                                 let ttl : String;
-                                                                let text = format!("<str>{}<str/> <br> This code can be used only once", code);
+                                                                let text = format!("<b>{}</b> <br> This code can be used only once", code);
                                                                 match payload.ttl {
                                                                     Some(specified_ttl)=>{
                                                                         ttl = specified_ttl;
