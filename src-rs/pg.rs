@@ -20,6 +20,12 @@ pub enum PgResult {
     SumnAintRight,
 }
 
+pub enum CreateAppResult {
+    CONFLICT,
+    OK,
+    ERR
+}
+
 pub async fn create_user(email: String) -> bool {
     let api_key = var("SUPABASE_KEY").unwrap();
     let db_url = var("SUPABASE_URL").unwrap();
@@ -139,7 +145,7 @@ pub async fn api_key_is_valid(user_api_key: &str) -> PgResult {
     }
 }
 
-pub async fn create_app(name: &str, user_api_key: &str, default_ttl: &str ) -> bool {
+pub async fn create_app(name: &str, user_api_key: &str, default_ttl: &str ) -> CreateAppResult {
     match api_key_is_valid(user_api_key).await {
         PgResult::YESSIR => {
             let api_key = var("SUPABASE_KEY").unwrap();
@@ -156,14 +162,15 @@ pub async fn create_app(name: &str, user_api_key: &str, default_ttl: &str ) -> b
                 .await;
             if let Ok(response) = request {
                 match response.status() {
-                    StatusCode::CREATED => true,
-                    _ => false,
+                    StatusCode::CREATED => CreateAppResult::OK,
+                    StatusCode::CONFLICT => CreateAppResult::CONFLICT,
+                    _ => CreateAppResult::ERR
                 }
             } else {
-                false
+                CreateAppResult::ERR
             }
         }
-        PgResult::NOPE => false,
-        PgResult::SumnAintRight => false,
+        PgResult::NOPE => CreateAppResult::ERR,
+        PgResult::SumnAintRight => CreateAppResult::ERR,
     }
 }
