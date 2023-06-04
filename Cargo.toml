@@ -36,6 +36,10 @@ name = "create_app"
 path = "api/apps/create.rs"
 
 [[bin]]
+name = "get_all_apps"
+path = "api/apps/get.rs"
+
+[[bin]]
 name = "request_auth_for_user"
 path = "api/request.rs"
 
