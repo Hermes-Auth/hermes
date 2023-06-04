@@ -15,8 +15,8 @@ struct Payload {
 
 #[derive(Deserialize)]
 struct App {
-    name: String,
-    owner: String,
+    _name: String,
+    _owner: String,
     default_ttl: String
 }
 
@@ -62,7 +62,7 @@ pub async fn handler(req: Request) -> Result<Response<Body>, Error> {
                                                                         ttl = found_app.default_ttl.to_owned();
                                                                     }
                                                                 }
-                                                                if  setex_key(format!("code:{}", &payload.target), code, ttl).await {
+                                                                if  setex_key(format!("code:{}:{}", &payload.app, &payload.target), code, ttl).await {
                                                                     if send_mail(payload.target, text, payload.subject){
                                                                         respond_with_body(StatusCode::OK, "Code sent to your user".to_string())
                                                                     }else {
