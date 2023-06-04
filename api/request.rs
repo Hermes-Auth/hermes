@@ -1,5 +1,5 @@
-use hermes::respond;
-use std::env::var;
+use hermes::{ respond, redis::setex_key, generate_code, respond_with_body };
+use std::{env::var, format};
 use reqwest::{self, Client };
 use serde::Deserialize;
 use vercel_runtime::{run, Body, Error, Request, Response, StatusCode};
@@ -50,7 +50,19 @@ pub async fn handler(req: Request) -> Result<Response<Body>, Error> {
                                                             if data.len() == 0 {
                                                                 respond(StatusCode::UNAUTHORIZED)
                                                             }else {
-                                                                respond(StatusCode::OK)
+                                                                let code = generate_code();
+                                                                let mut ttl = String::from("");
+                                                                match payload.ttl {
+                                                                    Some(specified_ttl)=>{
+                                                                        ttl = specified_ttl;
+                                                                    },
+                                                                    None=>{}
+                                                                }
+                                                                if  setex_key(format!("code:{}", &payload.target), code, ttl).await {
+                                                                    respond_with_body(StatusCode::OK, "Code set".to_string())
+                                                                }else {
+                                                                    respond(StatusCode::INTERNAL_SERVER_ERROR)
+                                                                }
                                                             }
                                                         },
                                                         Err(_)=> respond(StatusCode::BAD_REQUEST)
