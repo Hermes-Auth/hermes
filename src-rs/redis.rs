@@ -44,7 +44,10 @@ pub async fn setex_key(key: String, value: String, expiration: String) -> bool {
                 StatusCode::OK=>{
                     true
                 },
-                _=>{
+                code=>{
+                    let res = response.text().await.unwrap();
+                    println!("{:?}", code);
+                    println!("{:?}", res);
                     false
                 }
             }
