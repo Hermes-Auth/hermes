@@ -51,12 +51,14 @@ pub async fn handler(req: Request) -> Result<Response<Body>, Error> {
                                                                 respond(StatusCode::UNAUTHORIZED)
                                                             }else {
                                                                 let code = generate_code();
-                                                                let mut ttl = String::from("");
+                                                                let ttl : String;
                                                                 match payload.ttl {
                                                                     Some(specified_ttl)=>{
                                                                         ttl = specified_ttl;
                                                                     },
-                                                                    None=>{}
+                                                                    None=>{
+                                                                        ttl = data.first().unwrap().default_ttl.to_owned();
+                                                                    }
                                                                 }
                                                                 if  setex_key(format!("code:{}", &payload.target), code, ttl).await {
                                                                     
