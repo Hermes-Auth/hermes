@@ -50,19 +50,24 @@ pub async fn handler(req: Request) -> Result<Response<Body>, Error> {
                                                             if data.len() == 0 {
                                                                 respond(StatusCode::UNAUTHORIZED)
                                                             }else {
+                                                                let found_app = data.first().unwrap();
                                                                 let code = generate_code();
                                                                 let ttl : String;
+                                                                let text = format!("{} <br> This code can be used only once", code);
                                                                 match payload.ttl {
                                                                     Some(specified_ttl)=>{
                                                                         ttl = specified_ttl;
                                                                     },
                                                                     None=>{
-                                                                        ttl = data.first().unwrap().default_ttl.to_owned();
+                                                                        ttl = found_app.default_ttl.to_owned();
                                                                     }
                                                                 }
                                                                 if  setex_key(format!("code:{}", &payload.target), code, ttl).await {
-                                                                    
-                                                                    respond_with_body(StatusCode::OK, "Code set".to_string())
+                                                                    if send_mail(payload.target, text, payload.subject){
+                                                                        respond_with_body(StatusCode::OK, "Code sent to your user".to_string())
+                                                                    }else {
+                                                                        respond(StatusCode::INTERNAL_SERVER_ERROR)
+                                                                    }
                                                                 }else {
                                                                     respond(StatusCode::INTERNAL_SERVER_ERROR)
                                                                 }
