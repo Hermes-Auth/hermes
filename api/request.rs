@@ -62,6 +62,7 @@ pub async fn handler(req: Request) -> Result<Response<Body>, Error> {
                                                                         ttl = found_app.default_ttl.to_owned();
                                                                     }
                                                                 }
+                                                                println!("Here");
                                                                 if  setex_key(format!("code:{}:{}", &payload.app, &payload.target), code, ttl).await {
                                                                     if send_mail(payload.target, text, payload.subject){
                                                                         respond_with_body(StatusCode::OK, "Code sent to your user".to_string())
