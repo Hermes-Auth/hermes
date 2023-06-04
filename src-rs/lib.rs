@@ -9,6 +9,17 @@ use serde_json::json;
 use vercel_runtime::{Body, Error, Response, StatusCode};
 use rand::Rng;
 
+pub enum AuthRequestResult {
+    Success,
+    ServerErr,
+    AppNotFoundErr,
+    InvalidKeyErr
+}
+
+pub fn request_auth_for_user( api_key: &str, target: &str, app: &str, subject: Option<&str> ){
+
+}
+
 pub fn send_mail(receiver: String, text: String, subject: String) -> bool {
     let email = Message::builder()
         .from("pigeondev01@gmail.com".parse().unwrap())
@@ -43,7 +54,6 @@ pub fn respond(status_code: StatusCode) -> Result<Response<Body>, Error> {
 pub fn generate_code() -> String{
     rand::thread_rng().gen_range(100_000..1_000_000).to_string()
 }
-
 
 pub fn respond_with_body(status_code: StatusCode, data: String) -> Result<Response<Body>, Error> {
     Ok(Response::builder()

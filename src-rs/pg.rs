@@ -174,3 +174,4 @@ pub async fn create_app(name: &str, user_api_key: &str, default_ttl: &str ) -> C
         PgResult::SumnAintRight => CreateAppResult::ERR,
     }
 }
+
