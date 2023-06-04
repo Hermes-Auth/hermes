@@ -15,8 +15,8 @@ struct Payload {
 
 #[derive(Deserialize)]
 struct App {
-    _name: String,
-    _owner: String,
+    name: String,
+    owner: String,
     default_ttl: String,
 }
 
