@@ -1,7 +1,7 @@
 pub mod redis;
 pub mod pg;
 extern crate lettre;
-
+use std::env::var;
 use lettre::message::header::ContentType;
 use lettre::transport::smtp::authentication::Credentials;
 use lettre::{Message, SmtpTransport, Transport};
@@ -18,15 +18,15 @@ pub enum AuthRequestResult {
 
 pub fn send_mail(receiver: String, text: String, subject: String) -> bool {
     let email = Message::builder()
-        .from("pigeondev01@gmail.com".parse().unwrap())
+        .from("noreply.auth.hermes@gmail.com".parse().unwrap())
         .to(receiver.parse().unwrap())
         .subject(subject)
         .header(ContentType::TEXT_HTML)
         .body(text)
         .unwrap();
     let creds = Credentials::new(
-        "pigeondev01@gmail.com".to_owned(),
-        "fkyndapgxobbxodq".to_owned(),
+        "noreply.auth.hermes@gmail.com".to_owned(),
+        var("SMTP_PASS").unwrap().to_owned(),
     );
     let mailer = SmtpTransport::relay("smtp.gmail.com")
         .unwrap()

@@ -52,7 +52,7 @@ pub async fn handler(req: Request) -> Result<Response<Body>, Error> {
                                             let code = generate_code();
                                             let ttl: String;
                                             let text = format!(
-                                                "<b>{}</b> <br> This code can be used only once",
+                                                "<b>{}</b>",
                                                 code
                                             );
                                             match payload.ttl {
