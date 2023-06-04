@@ -64,7 +64,7 @@ pub async fn handler(req: Request) -> Result<Response<Body>, Error> {
                                                 }
                                             }
                                             if setex_key(
-                                                format!("code:{}", &payload.target),
+                                                format!("code:{}:{}", &payload.app, &payload.target),
                                                 code,
                                                 ttl,
                                             )
