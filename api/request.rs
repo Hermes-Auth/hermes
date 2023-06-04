@@ -1,4 +1,4 @@
-use hermes::{ respond, redis::setex_key, generate_code, respond_with_body };
+use hermes::{ respond, redis::setex_key, generate_code, respond_with_body, send_mail };
 use std::{env::var, format};
 use reqwest::{self, Client };
 use serde::Deserialize;
@@ -8,7 +8,7 @@ use vercel_runtime::{run, Body, Error, Request, Response, StatusCode};
 struct Payload {
     api_key: String,
     target: String,
-    subject: Option<String>,
+    subject: String,
     app: String,
     ttl: Option<String>,
 }
@@ -35,7 +35,7 @@ pub async fn handler(req: Request) -> Result<Response<Body>, Error> {
                             let api_key = var("SUPABASE_KEY").unwrap();
                             let db_url = var("SUPABASE_URL").unwrap();
                             let request = Client::new()
-                                .get(format!("{db_url}/rest/v1/apps?id=eq.{}", &payload.app))
+                                .get(format!("{db_url}/rest/v1/apps?id=eq.{}&owner=eq.{}", &payload.app, &payload.api_key))
                                 .header("apiKey", api_key)
                                 .send()
                                 .await;
@@ -59,6 +59,7 @@ pub async fn handler(req: Request) -> Result<Response<Body>, Error> {
                                                                     None=>{}
                                                                 }
                                                                 if  setex_key(format!("code:{}", &payload.target), code, ttl).await {
+                                                                    
                                                                     respond_with_body(StatusCode::OK, "Code set".to_string())
                                                                 }else {
                                                                     respond(StatusCode::INTERNAL_SERVER_ERROR)
