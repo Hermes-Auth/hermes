@@ -55,3 +55,26 @@ pub async fn setex_key(key: String, value: String, expiration: String) -> bool {
         }
     }
 }
+
+pub async fn del_key(key: &str) -> bool {
+    let redis_url = var("REDIS_URL").unwrap();
+    let command = format!("{redis_url}/del/{key}");
+    let redis_token = var("REDIS_TOKEN").unwrap();
+    let result = reqwest::Client::new()
+        .get(command)
+        .header("Authorization", format!("Bearer {redis_token}"))
+        .send()
+        .await;
+    match result {
+        Ok(response)=>{
+            match response.status() {
+                StatusCode::OK => true,
+                _=> false
+            }
+        },
+        Err(err)=>{
+            println!("{err}");
+            false
+        }
+    }
+}

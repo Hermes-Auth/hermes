@@ -1,8 +1,8 @@
-use hermes::{ respond, redis::get_key, respond_with_body };
+use hermes::{ respond, redis::{ get_key, del_key }, respond_with_body };
 use reqwest::{self, Client};
 use serde::Deserialize;
 use serde_json::{from_str, Value};
-use std::env::var;
+use std::{env::var, println};
 use vercel_runtime::{run, Body, Error, Request, Response, StatusCode};
 
 #[derive(Deserialize)]
@@ -57,7 +57,7 @@ pub async fn handler(req: Request) -> Result<Response<Body>, Error> {
                                                         respond(StatusCode::UNAUTHORIZED)
                                                     }else {
                                                         let key = format!("code:{}:{}", &payload.app_id, &payload.target);
-                                                        match get_key(key).await.as_str() {
+                                                        match get_key(key.to_owned()).await.as_str() {
                                                             "" => respond(StatusCode::BAD_REQUEST),
                                                             value =>{
                                                                 match from_str::<RedisResult>(value) {
@@ -68,7 +68,8 @@ pub async fn handler(req: Request) -> Result<Response<Body>, Error> {
                                                                             },
                                                                             Value::String(code)=>{
                                                                                 if payload.code == code {
-                                                                                    //Expire key
+                                                                                    let key_deletion = del_key(&key).await;
+                                                                                    println!("{key_deletion}");
                                                                                     respond(StatusCode::OK)
                                                                                 }else {
                                                                                     respond(StatusCode::BAD_REQUEST)
